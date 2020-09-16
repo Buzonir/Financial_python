@@ -51,7 +51,7 @@ Data1={}&slcTaxa={}'.format(date_1, curve_date, index.upper())
     return curve
 
 def get_dic_curve(date_curve, index):
-    """Make a dictionary from a lista"""
+    """Make a dictionary from a list"""
     curve = get_curve_b3(date_curve, index)
     dic_curve = {}
     for value in curve:
@@ -60,7 +60,7 @@ def get_dic_curve(date_curve, index):
     return dic_curve
 
 def interpolate(wrk_days, given_curve, given_dic):
-    """Get the yield given a working date and a given curve.
+    """Retrun the yield given a number of working day and a given curve.
     If necessary, we make the exponential interpolation of the curve"""
     try:
         yld = given_dic[wrk_days]
