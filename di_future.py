@@ -9,11 +9,11 @@ from datetime import datetime, timedelta
 from bizdays import Calendar
 
 #Holidays calendar from ANBIMA.
-FERIADOS = open('C:/Users/buzon/Documents/Python/Arquivos base/Anbima.txt', 'r')
+HOLIDAYS_TXT = open('C:/Users/buzon/Documents/Python/Arquivos base/Anbima.txt', 'r')
 HOLIDAYS = []
-for row in FERIADOS:
+for row in HOLIDAYS_TXT:
     HOLIDAYS.append(row.strip())
-FERIADOS.close()
+HOLIDAYS_TXT.close()
 
 #Holidays and settlement day.
 cal = Calendar(HOLIDAYS, ['Sunday', 'Saturday'])
@@ -35,7 +35,7 @@ CARRY = (1 + CDI)**(1/252)
 
 
 def get_maturity(stm_date):
-    """Getting the maturity. Format: ddmmaaaa"""
+    """Get the maturity. Format: ddmmaaaa"""
     if stm_date[:2].upper() == COD_BBG:
         stm_date = '01' + bmef[stm_date[2].upper()] + "20" + stm_date[3:]
     elif stm_date[:3].upper() == COD_BMF:
@@ -49,8 +49,7 @@ def between_dates(maturity, base, stm_date=dt_settlement):
     elif base == 360:
         return_date = (maturity - stm_date).days #b360
     else:
-        print('Invalid Base!')
-        return False
+        return_date = print('Invalid Base!')
     return return_date
 
 def carry_unit_price(value, intraday=False):
@@ -70,7 +69,7 @@ def shft_yield(cls_yield, bps=1):
     return cls_yield
 
 def pnl_di(maturity, quantity, clsd2_yield, cls_yield, intra=False):
-    """Getting the PnL of the DI1 future"""
+    """Calculate the PnL of the DI1 future"""
     maturity = get_maturity(maturity)
     btwn_days = between_dates(maturity, 252)
     btwn_days_d1 = btwn_days + 1
@@ -85,7 +84,7 @@ def pnl_di(maturity, quantity, clsd2_yield, cls_yield, intra=False):
     return round(pnl, 2)
 
 def dv_di(maturity, quantity, cls_yield):
-    """Getting the DV01"""
+    """Calculate the DV01"""
     yield_sh = shft_yield(cls_yield)
     maturity = get_maturity(maturity)
     working_days = between_dates(maturity, 252, dt_today)
