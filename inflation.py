@@ -12,11 +12,11 @@ from datetime import datetime, timedelta, date
 from bizdays import Calendar
 
 #Getting brazilians holidays from a txt.
-FERIADOS = open('C:/Users/buzon/Documents/Python/Arquivos base/Anbima.txt', 'r')
+HOLIDAYS_TXT = open('C:/Users/buzon/Documents/Python/Arquivos base/Anbima.txt', 'r')
 HOLIDAYS = []
-for linha in FERIADOS:
+for linha in HOLIDAYS_TXT:
     HOLIDAYS.append(linha.strip())
-FERIADOS.close()
+HOLIDAYS_TXT.close()
 
 #Holidays and dates.
 cal = Calendar(HOLIDAYS, ['Sunday', 'Saturday'])
@@ -72,7 +72,7 @@ def ratio_ipca(coef=INDEX_IPCA_RELEASED, preview=PREVIEW_IPCA, dt_stm=dt_settlem
     return project_index(coef, preview, dt_stm) / INDEX_IPCA_INT
 
 def get_vna(ratio):
-    """Get the VNA."""
+    """Get the updated nominal value."""
     return truncate(ratio * 1000, 6)
 
 def get_maturity(asset):
@@ -126,14 +126,14 @@ def quotation_rate(asset, cls_yield, dt_stm=dt_settlement):
 
 def unit_price(asset, cls_yield, dt_stm=dt_settlement, preview=PREVIEW_IPCA,
                coef=INDEX_IPCA_RELEASED):
-    """Get the PU of the asset."""
+    """Calculate the unit price"""
     quot_rate = quotation_rate(asset, cls_yield, dt_stm)
     return truncate(get_vna(ratio_ipca(coef=coef, preview=preview, dt_stm=dt_stm)) *
                     quot_rate, 6)
 
 def pnl_b(asset, clsd2_yield, cls_yield, intra=False, dt_stm=dt_settlement):
-    """Calculate the PnL of the asset."""
-    quantity = int(input('Quantas qtdes foram operadas: '))
+    """Calculate the PnL."""
+    quantity = int(input('Quantities: '))
     dt_d1 = cal.adjust_previous(dt_stm + timedelta(-1))
     up_d2 = unit_price(asset, clsd2_yield, dt_d1, PREVIEW_IPCA_PRIOR, INDEX_IPCA_PRIOR)
     up_d1 = unit_price(asset, cls_yield, dt_stm)
