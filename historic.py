@@ -7,7 +7,7 @@ Created on Fri Sep 18 17:41:04 2020
 
 import matplotlib.pyplot as graph
 import B3curve as b3
-from datetime import datetime
+from datetime import datetime, timedelta
 from bizdays import Calendar
 import di_derivative as di
 
@@ -137,3 +137,19 @@ def historic_txt(start, end, maturity_str):
     graph.xticks(rotation=45)
     graph.grid()
     graph.gcf().set_size_inches(15*len(dates)/34, 8)
+
+def get_cls_yield(maturity, curve_date=None):
+    """Get the close yield given the maturity of di future. Format: YYYYMMDD"""
+    if curve_date == None:
+        curve_dt = cal.adjust_previous(datetime.today() + timedelta(-1))
+        date_str = datetime.strftime(curve_dt, FORMAT_B3)
+    else:
+        curve_dt = datetime.strptime(curve_date, FORMAT)
+        date_str = curve_date
+    maturity = di.get_maturity(maturity)
+    curve = b3.get_curve_txt(date_str)
+    curve_dic = b3.get_dic_curve(curve)
+    wrk_days = cal.bizdays(curve_dt, maturity)
+    cls_yield = b3.interpolate(wrk_days, curve, curve_dic)
+    
+    return cls_yield
