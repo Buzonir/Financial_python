@@ -21,10 +21,15 @@ for row in ANBIMA_HOL:
 ANBIMA_HOL.close()
 cal = Calendar(HOLIDAYS, ['Sunday', 'Saturday'])
 
+SEP = '@'
+PATH = 'C:/Users/buzon/Documents/Curvas/Curve_'
 FORMAT = '%Y%m%d'
 
 def get_curve_b3(curve_date, index):
     """Get the future di curve from B3. Format YYYYMMDD"""
+    curve_date = datetime.strptime(curve_date, FORMAT)
+    curve_date = cal.adjust_next(curve_date)
+    curve_date = datetime.strftime(curve_date, FORMAT)
     date_1 = (curve_date[-2:] + "/" +
               curve_date[4:6] + "/" +
               curve_date[:4])
@@ -50,9 +55,21 @@ Data1={}&slcTaxa={}'.format(date_1, curve_date, index.upper())
         
     return curve
 
-def get_dic_curve(date_curve, index):
+def get_curve_txt(curve_date):
+    """Get the yield curve list from a txt file. Format: YYYYMMDD"""
+    curve_txt = open(PATH + curve_date + '.txt', 'r')
+    curve = []
+    for line in curve_txt:
+        line_r = line.split(SEP)
+        line_r[0] = int(line_r[0])
+        line_r[1] = float(line_r[1])
+        curve.append(line_r)
+    curve_txt.close()
+    
+    return curve
+
+def get_dic_curve(curve):
     """Make a dictionary from a list"""
-    curve = get_curve_b3(date_curve, index)
     dic_curve = {}
     for value in curve:
         dic_curve[value[0]] = value[1]
@@ -60,7 +77,7 @@ def get_dic_curve(date_curve, index):
     return dic_curve
 
 def interpolate(wrk_days, given_curve, given_dic):
-    """Retrun the yield given a number of working day and a given curve.
+    """Get the yield given a working date and a given curve.
     If necessary, we make the exponential interpolation of the curve"""
     try:
         yld = given_dic[wrk_days]
