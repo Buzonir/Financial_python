@@ -89,7 +89,7 @@ def save_curve_txt(start, end=None):
             curve_txt.close()
             print('File {} saved.'.format(file_name))     
         start_dt = cal.offset(start_dt, NEXT_DAY)
-        start_dt = datetime(start_dt.year, start_dt.month, start_dt.day)
+        # start_dt = datetime(start_dt.year, start_dt.month, start_dt.day)
 
 def historic_txt(start, end, maturity_str):
     """Get the historic yield of a vertice. Format ddmmyyyy"""
@@ -106,19 +106,21 @@ def historic_txt(start, end, maturity_str):
         start_str = datetime.strftime(start_dt, FORMAT_B3)
         file_name = 'Curve_' + start_str + '.txt'
         curve_txt = open(PATH + file_name, 'r')
-        curve_list = []
-        for i in curve_txt:
-            i_list = i.split(SEP)
-            i_list[0] = int(i_list[0])
-            i_list[1] = float(i_list[1].strip())
-            curve_list.append(i_list)
-        curve_dic = b3.get_dic_curve(curve_list)
-        dates.append(start_dt)
-        dates_str.append(start_str)
-        curves_dics.append(curve_dic)
-        curves_lists.append(curve_dic)
-        start_dt = cal.offset(start_dt, NEXT_DAY)
-        start_dt = datetime(start_dt.year, start_dt.month, start_dt.day)
+        if curve_txt != []:
+            curve_list = []
+            for i in curve_txt:
+                i_list = i.split(SEP)
+                i_list[0] = int(i_list[0])
+                i_list[1] = float(i_list[1].strip())
+                curve_list.append(i_list)
+            curve_dic = b3.get_dic_curve(curve_list)
+            dates.append(start_dt)
+            dates_str.append(start_str)
+            curves_dics.append(curve_dic)
+            curves_lists.append(curve_list)
+            start_dt = cal.offset(start_dt, NEXT_DAY)
+            start_dt = datetime(start_dt.year, start_dt.month, start_dt.day)
+        curve_txt.close()
     
     maturity = di.get_maturity(maturity_str)
     dates_index = 0
