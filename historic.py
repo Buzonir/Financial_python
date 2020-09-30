@@ -97,6 +97,7 @@ def historic_txt(start, end, maturity_str):
     start_dt = datetime.strptime(start, FORMAT)
     end_dt = datetime.strptime(end, FORMAT)
     
+    error = False
     curves_dics = []
     curves_lists = []
     dates_str = []
@@ -106,13 +107,14 @@ def historic_txt(start, end, maturity_str):
         start_str = datetime.strftime(start_dt, FORMAT_B3)
         file_name = 'Curve_' + start_str + '.txt'
         curve_txt = open(PATH + file_name, 'r')
-        if curve_txt != []:
-            curve_list = []
-            for i in curve_txt:
-                i_list = i.split(SEP)
-                i_list[0] = int(i_list[0])
-                i_list[1] = float(i_list[1].strip())
-                curve_list.append(i_list)
+
+        curve_list = []
+        for i in curve_txt:
+            i_list = i.split(SEP)
+            i_list[0] = int(i_list[0])
+            i_list[1] = float(i_list[1].strip())
+            curve_list.append(i_list)
+        if curve_list != []:
             curve_dic = b3.get_dic_curve(curve_list)
             dates.append(start_dt)
             dates_str.append(start_str)
@@ -120,23 +122,39 @@ def historic_txt(start, end, maturity_str):
             curves_lists.append(curve_list)
             start_dt = cal.offset(start_dt, NEXT_DAY)
             start_dt = datetime(start_dt.year, start_dt.month, start_dt.day)
+        else:
+            print('Curve {} is empty.'.format(start_str))
+            error = True
+            start_dt = end_dt + timedelta(1)
+        
         curve_txt.close()
     
-    maturity = di.get_maturity(maturity_str)
-    dates_index = 0
-    historic = []
+    if not error:
+        maturity = di.get_maturity(maturity_str)
+        dates_index = 0
+        historic = []
+        
+        for day in dates:
+            wrk_days = cal.bizdays(day, maturity)
+            yield_r = b3.interpolate(wrk_days, curves_lists[dates_index], curves_dics[dates_index])
+            historic.append(yield_r)
+            dates_index += 1
     
-    for day in dates:
-        wrk_days = cal.bizdays(day, maturity)
-        yield_r = b3.interpolate(wrk_days, curves_lists[dates_index], curves_dics[dates_index])
-        historic.append(yield_r)
-        dates_index += 1
-
-    graph.plot(dates_str, historic)
-    graph.title(maturity_str.upper())
-    graph.xticks(rotation=45)
-    graph.grid()
-    graph.gcf().set_size_inches(15*len(dates)/34, 8)
+        graph.plot(dates_str, historic)
+        graph.title(maturity_str.upper())
+        graph.xticks(rotation=45)
+        graph.grid()
+        graph.gcf().set_size_inches(15*len(dates)/34, 8)
+        
+        delta = int(round((historic[len(historic)-1] - historic[0])*100, 0))
+        if delta > 0:
+            text = '{} increased +{} bps.'
+        elif delta < 0:
+            text = '{} decreased -{} bps.'
+        else:
+            text = '{} has {} delta.'
+            
+        print(text.format(maturity_str.upper(), str(abs(delta))))
 
 def get_cls_yield(maturity, curve_date=None):
     """Get the close yield given the maturity of di future. Format: YYYYMMDD"""
