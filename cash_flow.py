@@ -173,4 +173,14 @@ def ncontracts_gdv(maturity, dv01):
     cls_yield = hist.get_cls_yield(maturity)
     dv_per_ct = di.dv_di(maturity, 1, cls_yield)
     return int(round(dv01 / dv_per_ct, 0))
+
+def hedge_di(list_di, list_expo):
+    """Calculate the di contracts to make the hedge of a given cash flow"""
+    list_r = []
+    if len(list_di) == len(list_expo):
+        for index, value in enumerate(list_di):
+            list_r.append([value, -ncontracts_gdv(value, list_expo[index])])
+    else:
+        list_r = print("The lists have not the same size.")
+    return list_r
     
